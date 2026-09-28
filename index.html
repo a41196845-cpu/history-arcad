@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>History Arcade — ELD 2</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#070a14;color:#f7f9ff;font-family:Arial,Helvetica,sans-serif;min-height:100vh;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:70px 70px;opacity:.12;animation:stars 18s linear infinite;pointer-events:none}
+@keyframes stars{to{transform:translate(-70px,70px)}} .wrap{max-width:980px;margin:auto;padding:28px 18px}
+.card{position:relative;overflow:hidden;border:1px solid #303c5c;border-radius:26px;padding:28px;background:radial-gradient(circle at 75% 5%,#33205e,#12162d 36%,#080c17 78%);min-height:650px}
+.logo{font-size:clamp(40px,9vw,78px);font-weight:1000;line-height:.84;letter-spacing:.06em;text-shadow:0 0 25px #4de7ff66,5px 5px #27194b;animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-6px)}} .sub{color:#c0c9e2;max-width:700px;font-size:18px;line-height:1.5;margin:18px 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 12px;border:1px solid #ffffff1c;border-radius:999px;background:#ffffff0b;font-size:12px}
+.screen{display:none;margin-top:20px;padding:22px;border:1px solid #2d3957;border-radius:20px;background:#0c1221;animation:enter .35s ease}.screen.active{display:block}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.btn,.power,.answer{font:inherit}.btn{border:0;border-radius:14px;padding:14px 20px;min-height:48px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#4de7ff,#8effed);color:#061019;transition:.18s}.btn:hover{transform:translateY(-2px) scale(1.02)}.gold{background:linear-gradient(135deg,#ffd166,#ff9e43)}
+.namebox{display:flex;gap:9px;max-width:500px;margin:20px 0}.namebox input{flex:1;padding:14px;border-radius:12px;border:1px solid #35415f;background:#0c1221;color:#fff;font-size:16px}
+.stats{display:flex;flex-wrap:wrap;gap:8px}.stat{background:#151e34;border:1px solid #2d3853;border-radius:12px;padding:10px 13px;font-weight:850}.stat b{color:#ffd166}
+.bar{height:9px;border-radius:99px;background:#202a42;overflow:hidden;margin:15px 0}.bar span{display:block;height:100%;background:linear-gradient(90deg,#4de7ff,#ff4edb);transition:width .45s}
+.q{font-size:clamp(23px,4vw,36px);font-weight:950;line-height:1.15;margin:22px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.answer{min-height:68px;text-align:left;padding:15px;border:1px solid #35415f;border-radius:15px;background:#151e34;color:white;font-weight:800;cursor:pointer;transition:.18s}.answer:hover{transform:translateY(-2px);background:#1b2945}.answer.correct{background:#103b29;border-color:#62f59a}.answer.wrong{background:#401b27;border-color:#ff647d}.answer:disabled{cursor:default;opacity:.8}
+.powerups{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0}.power{border:1px solid #ffffff20;border-radius:12px;background:#ffffff0b;color:#fff;padding:10px 13px;cursor:pointer;font-weight:800}.power:disabled{opacity:.35;cursor:not-allowed}
+.message{padding:13px 15px;border-left:4px solid #ffd166;background:#171f34;border-radius:12px;color:#e6ebfa}.center{text-align:center}.big{font-size:clamp(42px,8vw,70px);font-weight:1000}
+.boss{border-color:#ff4edb66;background:radial-gradient(circle at 50% 0,#421c4b,#151126 55%,#0b0c18)}.boss h2{color:#ff8cec;text-shadow:0 0 18px #ff4edb88}
+.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-4px)}}.pop{animation:pop .4s}@keyframes pop{50%{transform:scale(1.08)}}
+.flash{position:fixed;inset:0;z-index:99;pointer-events:none;animation:flash .5s}@keyframes flash{0%{opacity:0}25%{opacity:1;background:#4de7ff22}100%{opacity:0}}
+@media(max-width:620px){.answers{grid-template-columns:1fr}.card{padding:18px}.namebox{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<div class="logo">HISTORY<br>ARCADE</div>
+<div class="sub">A short history game in simple English. Answer 5 questions, earn points, use power-ups, and beat the final challenge!</div>
+<div class="chips"><span class="chip">🎮 SINGLE PLAYER</span><span class="chip">❤️ 3 LIVES</span><span class="chip">🔥 COMBO</span><span class="chip">🪙 COINS</span><span class="chip">👑 FINAL BOSS</span></div>
+
+<div id="home" class="screen active"><h2>🚀 Ready to play?</h2><p class="sub">Your mission: travel through world history and get as many points as you can.</p>
+<div class="namebox"><input id="player" value="Player" maxlength="18" aria-label="Player name"><button id="start" class="btn">PLAY ▶</button></div></div>
+
+<div id="game" class="screen"><div class="stats">
+<div class="stat">⭐ <b id="score">0</b></div><div class="stat">❤️ <b id="lives">3</b></div><div class="stat">🔥 <b id="combo">0</b></div><div class="stat">🪙 <b id="coins">0</b></div><div class="stat">📍 <b id="num">1</b>/5</div>
+</div><div class="bar"><span id="progress" style="width:0%"></span></div><div id="q" class="q"></div><div id="answers" class="answers"></div>
+<div class="powerups"><button id="hint" class="power">💡 HINT</button><button id="fifty" class="power">✂️ 50/50</button><button id="double" class="power">⚡ DOUBLE</button></div>
+<div id="message" class="message">Choose an answer!</div></div>
+
+<div id="boss" class="screen boss"><h2>👑 FINAL BOSS</h2><p>The Time Keeper gives you one last challenge!</p><div id="bq" class="q"></div><div id="ba" class="answers"></div><div id="bm" class="message">Choose your final answer.</div></div>
+
+<div id="end" class="screen center"><div class="big">🏆 GAME COMPLETE!</div><p id="result" class="sub"></p><p id="finalText"></p><button id="again" class="btn gold">🔄 PLAY AGAIN</button></div>
+</div></div>
+
+<script>
+(()=>{let player='Player',score=0,lives=3,combo=0,coins=0,index=0,doubleNext=false;const used={hint:false,fifty:false,double:false};
+const qs=[
+{q:'Which river was very important to Ancient Egypt?',a:['Nile River','Amazon River','Mississippi River','Danube River'],c:0,h:'It is a river in North Africa.'},
+{q:'Which city is known for the first democracy in Ancient Greece?',a:['Sparta','Athens','Rome','Paris'],c:1,h:'It was the home of many Greek philosophers.'},
+{q:'What invention helped books spread faster in Europe?',a:['The airplane','The printing press','The telephone','The computer'],c:1,h:'Johannes Gutenberg used it.'},
+{q:'Where did the Industrial Revolution begin?',a:['Great Britain','Mexico','China','Egypt'],c:0,h:'It began in Europe.'},
+{q:'What organization was created in 1945 to help countries work together?',a:['The UN','The Roman Empire','NASA','The Silk Road'],c:0,h:'UN means United Nations.'}
+];const boss={q:'In which year did World War II end?',a:['1918','1939','1945','1960'],c:2};
+const $=id=>document.getElementById(id);
+function show(id){['home','game','boss','end'].forEach(x=>$(x).classList.remove('active'));$(id).classList.add('active')}
+function flash(){const f=document.createElement('div');f.className='flash';document.body.appendChild(f);setTimeout(()=>f.remove(),520)}
+function stats(){$('score').textContent=score;$('lives').textContent=lives;$('combo').textContent=combo;$('coins').textContent=coins;$('num').textContent=Math.min(index+1,5);$('progress').style.width=(index/5*100)+'%';$('hint').disabled=used.hint;$('fifty').disabled=used.fifty;$('double').disabled=used.double}
+function load(){const x=qs[index];$('q').textContent=x.q;$('answers').innerHTML=x.a.map((v,i)=>`<button class="answer" data-i="${i}">${String.fromCharCode(65+i)}. ${v}</button>`).join('');$('message').textContent='Choose an answer!';stats();$('answers').querySelectorAll('.answer').forEach(b=>b.addEventListener('click',()=>answer(+b.dataset.i,b)))}
+function answer(i,b){const x=qs[index],all=[...$('answers').querySelectorAll('.answer')];all.forEach(v=>v.disabled=true);if(i===x.c){let gain=100+combo*30;if(doubleNext){gain*=2;doubleNext=false}score+=gain;coins+=20;combo++;b.classList.add('correct','pop');$('message').textContent='✅ Correct! +'+gain+' points. 🔥 Combo x'+combo;flash()}else{lives--;combo=0;b.classList.add('wrong','shake');all[x.c].classList.add('correct');$('message').textContent='❌ Not quite. The answer is '+x.a[x.c]+'.';flash()}stats();setTimeout(()=>{if(lives<=0){lives=3;score=Math.max(0,score-100)}index++;if(index<5)load();else startBoss()},1100)}
+function startBoss(){show('boss');$('bq').textContent=boss.q;$('ba').innerHTML=boss.a.map((v,i)=>`<button class="answer" data-i="${i}">${String.fromCharCode(65+i)}. ${v}</button>`).join('');$('bm').textContent='Choose your final answer.';$('ba').querySelectorAll('.answer').forEach(b=>b.addEventListener('click',()=>bossAnswer(+b.dataset.i,b)))}
+function bossAnswer(i,b){const all=[...$('ba').querySelectorAll('.answer')];all.forEach(v=>v.disabled=true);if(i===boss.c){score+=500;coins+=100;b.classList.add('correct','pop');$('bm').textContent='🔥 AMAZING! You defeated the Time Keeper! +500 points.';flash()}else{lives=0;all[boss.c].classList.add('correct');b.classList.add('wrong');$('bm').textContent='❌ The Time Keeper wins this round. The answer was '+boss.a[boss.c]+'.'}setTimeout(end,1300)}
+$('hint').addEventListener('click',()=>{used.hint=true;$('message').textContent='💡 HINT: '+qs[index].h;stats()});
+$('fifty').addEventListener('click',()=>{used.fifty=true;const x=qs[index];[...$('answers').querySelectorAll('.answer')].filter(v=>+v.dataset.i!==x.c).slice(0,2).forEach(v=>v.disabled=true);$('message').textContent='✂️ 50/50: Two wrong answers are gone!';stats()});
+$('double').addEventListener('click',()=>{used.double=true;doubleNext=true;$('message').textContent='⚡ DOUBLE POINTS are active!';stats()});
+function start(){player=$('player').value.trim()||'Player';score=0;lives=3;combo=0;coins=0;index=0;doubleNext=false;used.hint=used.fifty=used.double=false;show('game');load()}
+function end(){show('end');$('result').innerHTML='<b>'+player+'</b>, your final score is <b>'+score+' points</b>.';$('finalText').textContent=score>=900?'🌟 History Master!':score>=500?'🔥 Great job!':'💪 Good try! Play again and beat your score!';confetti()}
+function confetti(){for(let i=0;i<35;i++){const s=document.createElement('span');s.textContent=['⭐','✨','🎉','🪙'][i%4];s.style.position='fixed';s.style.left=Math.random()*95+'%';s.style.top='-20px';s.style.zIndex=100;s.style.fontSize=(15+Math.random()*18)+'px';s.style.transition='transform 1.8s ease,opacity 1.8s';document.body.appendChild(s);requestAnimationFrame(()=>{s.style.transform='translateY('+(450+Math.random()*300)+'px) rotate('+(Math.random()*600-300)+'deg)';s.style.opacity=0});setTimeout(()=>s.remove(),2000)}}
+$('start').addEventListener('click',start);$('again').addEventListener('click',()=>show('home'));
+})();
+</script>
+</body></html>
